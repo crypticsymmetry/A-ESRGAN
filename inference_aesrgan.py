@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--block', type=int, default=23, help='num_block in RRDB')
     parser.add_argument('--netscale', type=int, default=4, help='netscale value')
     parser.add_argument('--outscale', type=int, default=2, help='Output folder')
+    parser.add_argument('--face_enhance', action='store_true', help='Use GFPGAN to enhance face')
     parser.add_argument(
         '--ext',
         type=str,
@@ -44,7 +45,16 @@ def main():
         pre_pad=args.pre_pad,
         half=args.half)
 
+    if args.face_enhance:  # Use GFPGAN for face enhancement
+        from gfpgan import GFPGANer
+        face_enhancer = GFPGANer(
+            model_path='https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth',
+            upscale=args.outscale,
+            arch='clean',
+            channel_multiplier=2,
+            bg_upsampler=upsampler)
     os.makedirs(args.output, exist_ok=True)
+
 
     if os.path.isfile(args.input):
         paths = [args.input]
@@ -62,7 +72,10 @@ def main():
             img_mode = None
 
         try:
-            output, _ = upsampler.enhance(img, outscale=outscale)
+            if args.face_enhance:
+                _, _, output = face_enhancer.enhance(img, has_aligned=False, only_center_face=True, paste_back=True)
+            else:
+                output, _ = upsampler.enhance(img, outscale=outscale)
         except Exception as error:
             print('Error', error)
             print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
