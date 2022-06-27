@@ -16,20 +16,22 @@ def main():
         default='experiments/pretrained_models/A_ESRGAN_Single.pth',
         help='Path to the pre-trained model')
     parser.add_argument('--output', type=str, default='results', help='Output folder')
-    parser.add_argument('--suffix', type=str, default='out', help='Suffix of the restored image')
+    parser.add_argument('--suffix', type=str, default='', help='Suffix of the restored image')
     parser.add_argument('--tile', type=int, default=0, help='Tile size, 0 for no tile during testing')
     parser.add_argument('--tile_pad', type=int, default=10, help='Tile padding')
     parser.add_argument('--pre_pad', type=int, default=0, help='Pre padding size at each border')
     parser.add_argument('--half', action='store_true', help='Use half precision during inference')
     parser.add_argument('--block', type=int, default=23, help='num_block in RRDB')
+    parser.add_argument('--netscale', type=int, default=4, help='netscale value')
+    parser.add_argument('--outscale', type=int, default=2, help='Output folder')
     parser.add_argument(
         '--ext',
         type=str,
         default='auto',
         help='Image extension. Options: auto | jpg | png, auto means using the same extension as inputs')
     args = parser.parse_args()
-    netscale = 4
-    outscale = 4
+    netscale = args.netscale
+    outscale = args.outscale
 
     model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=args.block, num_grow_ch=32, scale=netscale)
 
